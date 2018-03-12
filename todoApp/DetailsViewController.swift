@@ -7,8 +7,21 @@
 //
 
 import UIKit
+import Alamofire
+import AlamofireImage
+
 
 class DetailsViewController: UIViewController {
+    @IBOutlet weak var scrollViewOut: UIScrollView!
+    @IBAction func showMoreClick(_ sender: UIButton) {
+        self.bookDescription.sizeToFit()
+        showMoreButton.isHidden = true
+        fetchButtonOut.isHidden = true
+    }
+    
+    @IBOutlet weak var showMoreButton: UIButton!
+    
+    @IBOutlet weak var fetchButtonOut: UIButton!
     
     @IBOutlet weak var bookTitle: UILabel!
     
@@ -16,6 +29,7 @@ class DetailsViewController: UIViewController {
     
     @IBOutlet weak var bookDescription: UILabel!
     
+    @IBOutlet weak var bookCover: UIImageView!
     
     @IBOutlet weak var myLbl: UILabel!
     var destinationMessage: String? = ""
@@ -24,7 +38,7 @@ class DetailsViewController: UIViewController {
         super.viewDidLoad()
         myLbl.text = destinationMessage
         bookDescription.textColor = UIColor.white
-
+        scrollViewOut.contentSize = CGSize(width: self.view.frame.width, height: self.view.frame.height + 400)
         // Do any additional setup after loading the view.
     }
 
@@ -41,10 +55,21 @@ class DetailsViewController: UIViewController {
         URLSession.shared.dataTask(with: url!, completionHandler: { (data, response, error) in
             do{
                 let myData = try JSONDecoder().decode(Item.self, from: data!)
+                let downloadURL = URL(string: (myData.items?.first?.volumeInfo?.imageLinks?.thumbnail)!)
+               
+                self.bookCover.af_setImage(withURL: downloadURL!)
+        
                 DispatchQueue.main.async {
-                    self.bookTitle.text = "Title: " + (myData.items?.first?.volumeInfo?.title!)!
+                    self.bookTitle.text = (myData.items?.first?.volumeInfo?.title!)!
                     self.bookSubtitle.text = myData.items?.first?.volumeInfo?.subtitle! ?? "title"
-                    self.bookDescription.text = "Description: " +  (myData.items?.first?.volumeInfo?.description!)!
+                    self.bookDescription.text = (myData.items?.first?.volumeInfo?.description!)!
+                    let neededSpace = self.bookDescription.sizeThatFits(CGSize(width: self.bookDescription.frame.width, height: CGFloat.greatestFiniteMagnitude))
+                    if neededSpace.height > self.bookDescription.frame.height {
+                        self.showMoreButton.isHidden = false
+                    } else {
+                        self.showMoreButton.isHidden = true
+                    }
+                    
                 }
                 print("\(myData.items?.first?.volumeInfo?.title! ?? "title") \(myData.items?.first?.volumeInfo?.publishedDate! ?? "publishedDate") \(myData.items?.first?.volumeInfo?.description! ?? "description") " )
             } catch{
@@ -53,3 +78,4 @@ class DetailsViewController: UIViewController {
         }).resume()
     }
 }
+

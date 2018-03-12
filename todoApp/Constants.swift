@@ -4,11 +4,16 @@ var bookListHaveRead:[Info]?
 
 var bookListWillRead:[Info]?
 
+struct ImageItem: Decodable {
+    let thumbnail: String?
+}
+
 struct PrePreItem: Decodable {
     let title: String?
     let subtitle: String?
     let publishedDate: String?
     let description: String?
+    let imageLinks: ImageItem?
 }
 
 struct PreItem: Decodable {
